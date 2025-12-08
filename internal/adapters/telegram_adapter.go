@@ -3,6 +3,7 @@ package adapters
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -37,7 +38,11 @@ func (c *TelegramClient) SendMessage(ctx context.Context, text, chatId string) e
 	if err != nil {
 		return fmt.Errorf("telegram_adapter: http request failed %w", err)
 	}
-	_ = resp
+	statusResp, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("telegram_adapter: failed read resp body status %w", err)
+	}
+	fmt.Println(string(statusResp))
 	defer resp.Body.Close()
 	return nil
 }

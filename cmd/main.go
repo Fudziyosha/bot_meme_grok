@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"telegram_bot/internal/config"
@@ -17,12 +18,12 @@ const ctxTimeout = 180 * time.Second
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("Файл .env не найден или не загружен")
+		log.Println("Файл env не найден или не загружен")
 	}
 	botToken := os.Getenv("BOT_TOKEN")
 	chatIDStr := os.Getenv("CHAT_ID")
 	if botToken == "" || chatIDStr == "" {
-		log.Fatal("Необходимые переменные окружения отсутствуют", "BOT_TOKEN", botToken, "CHAT_ID", chatIDStr)
+		log.Println("Необходимые переменные окружения отсутствуют", "BOT_TOKEN", botToken, "CHAT_ID", chatIDStr)
 		os.Exit(1)
 	}
 	cfg := openrouter.NewOpenTouterConfig()
@@ -30,7 +31,7 @@ func main() {
 	m := meme.NewMeme(cfgTG, cfg)
 
 	c := cron.New()
-	_, errCron := c.AddFunc("*/120 * * * *", func() {
+	_, err := c.AddFunc(config.V.GetString("time_cron"), func() {
 		log.Println("Порция мемов,держим +мораль")
 		ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 		defer cancel()
@@ -40,8 +41,8 @@ func main() {
 			panic(err)
 		}
 	})
-	if errCron != nil {
-		log.Fatal("Ошибка добавления задачи")
+	if err != nil {
+		fmt.Errorf("main: failed add cron %w", err)
 	}
 	log.Println("Бот активен,СТАРТУЕМ!")
 	c.Start()

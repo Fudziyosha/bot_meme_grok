@@ -1,0 +1,11 @@
+---
+
+
+ services:
+  app:
+    build: .
+    container_name: meme_bot-app
+    volumes:
+    - ./config:/config
+    env_file:
+    - .env

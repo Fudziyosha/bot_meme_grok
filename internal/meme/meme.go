@@ -35,7 +35,8 @@ func (m *Meme) SendErr(ctx context.Context) {
 }
 
 func (m *Meme) SendMeme(ctx context.Context) error {
-	randQuote := m.openRouterConfig.Prompt[rand.Intn(len(m.openRouterConfig.Prompt))]
+	promptCfg := config.V.GetStringSlice("prompt")
+	randQuote := promptCfg[rand.Intn(len(promptCfg))]
 	quote, err := m.openRouterClient.SendPrompt(ctx, randQuote)
 	if err != nil {
 		return fmt.Errorf("meme: failed send prompt %w", err)

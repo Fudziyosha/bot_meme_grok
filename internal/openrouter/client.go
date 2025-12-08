@@ -6,12 +6,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"telegram_bot/internal/config"
 
 	"github.com/tidwall/gjson"
 )
 
-const Url = "https://openrouter.ai/api/v1/chat/completions"
+const (
+	Url      = "https://openrouter.ai/api/v1/chat/completions"
+	StatusOk = 200
+)
 
 type OpenRouterClient struct {
 	token string
@@ -27,10 +32,9 @@ func (c *OpenRouterClient) getBasePath() (basePath string) {
 	return Url + c.token
 }
 
-// SendPrompt send post request, accept the response and return the quote
 func (c *OpenRouterClient) SendPrompt(ctx context.Context, prompt string) (string, error) {
 	body := RequestBody{
-		Model: "x-ai/grok-4.1-fast:free",
+		Model: config.V.GetString("model"),
 		Messages: []Message{
 			{
 				Role:    "user",
@@ -50,12 +54,14 @@ func (c *OpenRouterClient) SendPrompt(ctx context.Context, prompt string) (strin
 	if err != nil {
 		return "", fmt.Errorf("openrouter: create request error %w", err)
 	}
+	if resp.StatusCode != StatusOk {
+		log.Println("openrouter: failed response, statusCode")
+	}
 	bodyResp, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("openrouter: failed read body %w", err)
 	}
 	result := gjson.GetBytes(bodyResp, `choices.0.message.content`)
-	fmt.Println(result)
 	defer resp.Body.Close()
 	return result.Str, nil
 }

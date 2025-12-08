@@ -16,9 +16,6 @@ You need to add your bot's chat ID, API token, and the AI token**
 
 - [Example](https://github.com/Fudziyosha/bot_meme_grok/blob/master/.env.example)
 
-*You can also change the sending time. This is done here:* 
--
-```go
-_, errCron := c.AddFunc("*/120 * * * *", func()
-```
+**In config.yaml, you can change the AI ​​prompts, the model itself, and the time for sending a response to your Telegram channel.**
+
 **Where you need to change 120 minutes to any. But keep in mind that the free version assumes 50 requests per day. Keep in mind**
